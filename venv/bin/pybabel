@@ -1,0 +1,10 @@
+#!/bin/sh
+'''exec' "/Users/aqeishparvez/Documents/Centennial College Course Content/Course Work/Clincal Worklfow and IT Solutions/Project 2/MedicationReminderApp/venv/bin/python3.11" "$0" "$@"
+' '''
+# -*- coding: utf-8 -*-
+import re
+import sys
+from babel.messages.frontend import main
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
