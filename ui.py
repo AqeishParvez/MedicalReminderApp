@@ -121,7 +121,7 @@ def display_dashboard():
                 status_label = tk.Label(med_frame, text=med["status"], font=("Arial", 14), width=10)
                 status_label.pack(side="left")
 
-                edit_button = tk.Button(med_frame, text="Edit", font=("Arial", 10), command=lambda d=date_str, t=med["time"], n=med["name"]: open_schedule_form(d, n, t))
+                edit_button = tk.Button(med_frame, text="Edit", font=("Arial", 10), command=lambda d=date_str, t=med["time"], n=med["name"]: open_schedule_form(content_frame, d, n, t))
                 edit_button.pack(side="left", padx=5)
 
                 delete_button = tk.Button(med_frame, text="Del", font=("Arial", 10), command=lambda d=date_str, t=med["time"]: delete_medication(d, t))
@@ -537,6 +537,7 @@ def show_login_form(root):
         if success:
             logged_in_user = username
             messagebox.showinfo("Login", message)
+            notify_today_medications()
             
             # Destroy the login form widgets
             for widget in root.winfo_children():

@@ -93,24 +93,34 @@ def notify_today_medications():
     grouped_medications = MedicationStore.grouped_medications  # Access the stored medications directly
 
     today = datetime.today().strftime("%m-%d-%Y")
+    current_time = datetime.now().strftime("%I:%M %p")
     notifications = []
 
-    print(f"Checking for medications on {today}")  # Debugging line
-
     if today in grouped_medications:
-        print(f"Found medications for today: {grouped_medications[today]}")  # Debugging line
         for med in grouped_medications[today]:
+            # Compare the current time with the medication time
+            med_time = datetime.strptime(med["time"], "%I:%M %p")
+            current_time_dt = datetime.strptime(current_time, "%I:%M %p")
+
+            # If it's still pending and the time has passed, mark as missed
+            if med["status"] == "Pending" and current_time_dt > med_time:
+                med["status"] = "Missed"
+                save_data_to_file()
+
+            # If it's missed but the time hasn't passed yet, mark as pending
+            elif med["status"] == "Missed" and current_time_dt <= med_time:
+                med["status"] = "Pending"
+                save_data_to_file()
+
             if med["status"] == "Pending":
                 notifications.append(f"{med['name']} at {med['time']} - Status: {med['status']}")
-    else:
-        print("No medications found for today")  # Debugging line
 
     if notifications:
         message = "Today's Pending Medications:\n\n" + "\n".join(notifications)
-        print("Displaying notification box")  # Debugging line
         messagebox.showinfo("Medication Reminder", message)
     else:
-        print("No pending notifications for today")  # Debugging line
+        print("No pending notifications for today")
+
 
 
 def search_medications(med_name, status):

@@ -11,7 +11,6 @@ class MedicationStore:
             with open('medications.json', 'r') as file:
                 cls.grouped_medications = json.load(file)
             cls.update_missed_medications()  # Update status of missed medications
-            print("Loaded medications:", cls.grouped_medications)
         except FileNotFoundError:
             cls.grouped_medications = {}
 
