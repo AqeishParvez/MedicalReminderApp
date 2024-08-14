@@ -4,9 +4,12 @@ import json
 import tkinter as tk
 from tkinter import VERTICAL, Canvas, Frame, Label, Scrollbar, messagebox
 from tkinter import filedialog
-from data import add_or_update_medication, delete_medication, search_medications, mark_as_taken, mark_as_pending
+from data import add_or_update_medication, delete_medication, notify_today_medications, search_medications, mark_as_taken, mark_as_pending
 from medication_store import MedicationStore
 from tkcalendar import DateEntry
+from data import register_user, login_user
+
+logged_in_user = None
 
 # Initialize UI components
 def initialize_ui(root):
@@ -59,6 +62,12 @@ def initialize_ui(root):
 def show_dashboard():
     for widget in content_frame.winfo_children():
         widget.destroy()
+
+    # Display the welcome message
+    if logged_in_user:
+        welcome_message = f"Welcome, {logged_in_user}!"
+        tk.Label(content_frame, text=welcome_message, font=("Arial", 16, "bold"), bg="lightblue").pack(fill="x", pady=(10, 20))
+
     display_dashboard()
 
 # Function to display the dashboard
@@ -503,3 +512,78 @@ def apply_theme(theme, content_frame):
         content_frame.config(bg="black")
     elif theme == "Blue":
         content_frame.config(bg="lightblue")
+
+# Additional functions to handle UI components, login, and registration
+
+def show_login_form(root):
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    tk.Label(root, text="Login", font=("Arial", 16, "bold")).pack(pady=10)
+
+    tk.Label(root, text="Username:", font=("Arial", 12)).pack(pady=5)
+    username_entry = tk.Entry(root, font=("Arial", 12))
+    username_entry.pack(pady=5)
+
+    tk.Label(root, text="Password:", font=("Arial", 12)).pack(pady=5)
+    password_entry = tk.Entry(root, font=("Arial", 12), show='*')
+    password_entry.pack(pady=5)
+
+    def handle_login():
+        global logged_in_user
+        username = username_entry.get()
+        password = password_entry.get()
+        success, message = login_user(username, password)
+        if success:
+            logged_in_user = username
+            messagebox.showinfo("Login", message)
+            
+            # Destroy the login form widgets
+            for widget in root.winfo_children():
+                widget.destroy()
+            
+            # Initialize the main interface
+            initialize_ui(root)
+            
+            # Show the dashboard immediately after login
+            show_dashboard()
+        else:
+            messagebox.showerror("Login Failed", message)
+
+    login_button = tk.Button(root, text="Login", font=("Arial", 12), command=handle_login)
+    login_button.pack(pady=10)
+
+    tk.Label(root, text="Don't have an account?", font=("Arial", 10)).pack(pady=5)
+    register_button = tk.Button(root, text="Register", font=("Arial", 10), command=lambda: show_register_form(root))
+    register_button.pack(pady=5)
+
+def show_register_form(root):
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    tk.Label(root, text="Register", font=("Arial", 16, "bold")).pack(pady=10)
+
+    tk.Label(root, text="Username:", font=("Arial", 12)).pack(pady=5)
+    username_entry = tk.Entry(root, font=("Arial", 12))
+    username_entry.pack(pady=5)
+
+    tk.Label(root, text="Password:", font=("Arial", 12)).pack(pady=5)
+    password_entry = tk.Entry(root, font=("Arial", 12), show='*')
+    password_entry.pack(pady=5)
+
+    def handle_register():
+        username = username_entry.get()
+        password = password_entry.get()
+        success, message = register_user(username, password)
+        if success:
+            messagebox.showinfo("Register", message)
+            show_login_form(root)
+        else:
+            messagebox.showerror("Register Failed", message)
+
+    register_button = tk.Button(root, text="Register", font=("Arial", 12), command=handle_register)
+    register_button.pack(pady=10)
+
+    tk.Label(root, text="Already have an account?", font=("Arial", 10)).pack(pady=5)
+    login_button = tk.Button(root, text="Login", font=("Arial", 10), command=lambda: show_login_form(root))
+    login_button.pack(pady=5)

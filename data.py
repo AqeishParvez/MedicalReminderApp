@@ -1,7 +1,12 @@
 import json
 from datetime import datetime, timedelta
+import os
 from tkinter import messagebox
 from medication_store import MedicationStore
+import bcrypt
+
+# File path for storing user credentials
+USERS_FILE = 'users.json'
 
 def add_or_update_medication(date, med_name, time, recurring=False, frequency="daily", end_date=None, old_date=None, old_time=None):
     if old_date and old_time:  
@@ -141,3 +146,35 @@ def mark_as_pending(date, time):
             save_data_to_file()
             return True  # Indicate that the status was updated
     return False  # Indicate no update was made
+
+def load_users():
+    try:
+        with open(USERS_FILE, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {}
+
+def save_users(users):
+    with open(USERS_FILE, 'w') as file:
+        json.dump(users, file)
+
+def register_user(username, password):
+    users = load_users()
+    if username in users:
+        return False, "Username already exists."
+
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    users[username] = hashed_password
+    save_users(users)
+    return True, "Registration successful."
+
+def login_user(username, password):
+    users = load_users()
+    if username not in users:
+        return False, "User not found."
+
+    stored_password = users[username].encode()
+    if bcrypt.checkpw(password.encode(), stored_password):
+        return True, "Login successful."
+    else:
+        return False, "Incorrect password."
